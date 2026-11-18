@@ -11,7 +11,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: cargo-bins/cargo-binstall@main
@@ -21,9 +21,12 @@ jobs:
         run: rustup show && rustup target add thumbv7em-none-eabihf && rustup component add llvm-tools
       # RMK 0.9 の nRF BLE スタック（p256-cortex-m4-sys）のビルドに ARM GCC が必要
       - name: Install ARM GNU toolchain
-        run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi
+        run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi libclang-dev
       - uses: Swatinem/rust-cache@v2
       - name: Build uf2
+        env:
+          # nrf-mpsl-sys の bindgen が stdint.h を見つけられるよう ARM 用ヘッダーを渡す
+          BINDGEN_EXTRA_CLANG_ARGS: "-I/usr/lib/arm-none-eabi/include"
         run: cargo make uf2 --release
       - name: Collect firmware
         run: |
