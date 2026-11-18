@@ -17,7 +17,7 @@ ZMK に戻すときは、[ZMK版フォーク](https://github.com/OogamiZin/CLEAV
 
 ## ビルドと書き込み
 
-1. `config` を変更して main に push すると、Actions の **Build RMK firmware** が走ります
+1. `keyboard.toml` などを変更して main に push すると、Actions の **Build RMK firmware** が走ります
 2. 成功した実行の **Artifacts → firmware** をダウンロードして展開
 3. XIAO をブートローダーモード（リセットをダブルタップ）にして USB ドライブに UF2 をコピー
    - 左側: `cleave_hhjp_rmk_left_central.uf2`
