@@ -1,0 +1,36 @@
+name: Build RMK firmware
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cargo-bins/cargo-binstall@main
+      - name: Install cargo-make and flip-link
+        run: cargo binstall cargo-make flip-link -y
+      - name: Install Rust target and tools
+        run: rustup show && rustup target add thumbv7em-none-eabihf && rustup component add llvm-tools
+      # RMK 0.9 の nRF BLE スタック（p256-cortex-m4-sys）のビルドに ARM GCC が必要
+      - name: Install ARM GNU toolchain
+        run: sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi
+      - uses: Swatinem/rust-cache@v2
+      - name: Build uf2
+        run: cargo make uf2 --release
+      - name: Collect firmware
+        run: |
+          mkdir firmware
+          cp cleave-hhjp-rmk-central.uf2 firmware/cleave_hhjp_rmk_left_central.uf2
+          cp cleave-hhjp-rmk-peripheral.uf2 firmware/cleave_hhjp_rmk_right_peripheral.uf2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: firmware/*.uf2
